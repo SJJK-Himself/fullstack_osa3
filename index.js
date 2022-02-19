@@ -1,6 +1,8 @@
 const express = require('express')
 const app = express()
 
+app.use(express.json())
+
 let persons = [
     {
         id: 1,
@@ -26,6 +28,7 @@ let persons = [
 
 const contactAmt  = (persons.length)
 const currentTime = new Date()
+
 
 app.get('/', (req, res) => {
     res.send('<h1>Fullstack, osa 3</h1>')
@@ -53,6 +56,21 @@ app.delete('/api/persons/:id', (request, response) => {
   
     response.status(204).end()
 })
+
+app.post('/api/persons', (request, response) => {
+    const topId = persons.length > 0
+    ? Math.max(...persons.map(p => p.id)) 
+    : 0
+
+    const newPerson = request.body
+    newPerson.id = Math.floor(Math.random() * (100 - topId) + topId)
+
+    persons = persons.concat(newPerson)
+
+    console.log(newPerson)
+    response.json(newPerson)
+})
+
 
 const PORT = 3001
 app.listen(PORT)
