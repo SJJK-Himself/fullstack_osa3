@@ -29,6 +29,13 @@ let persons = [
 const contactAmt  = (persons.length)
 const currentTime = new Date()
 
+const generateId = () => {
+    const topId = persons.length > 0
+      ? Math.max(...persons.map(n => n.id))
+      : 0
+    return Math.floor(Math.random() * (100 - topId) + topId)
+}
+
 
 app.get('/', (req, res) => {
     res.send('<h1>Fullstack, osa 3</h1>')
@@ -58,12 +65,25 @@ app.delete('/api/persons/:id', (request, response) => {
 })
 
 app.post('/api/persons', (request, response) => {
-    const topId = persons.length > 0
-    ? Math.max(...persons.map(p => p.id)) 
-    : 0
+    const body = request.body
 
-    const newPerson = request.body
-    newPerson.id = Math.floor(Math.random() * (100 - topId) + topId)
+    if (!body.name || !body.number) {
+        return response.status(400).json({ 
+          error: 'Name or number missing' 
+        })
+    }
+
+    if (persons.some(p => p.name === body.name)) {
+        return response.status(400).json({ 
+            error: 'Name must be unique' 
+          })
+    }
+
+    const newPerson = {
+        id: generateId(),
+        name: body.name,
+        number: body.number
+    }
 
     persons = persons.concat(newPerson)
 
