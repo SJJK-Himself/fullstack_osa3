@@ -1,7 +1,18 @@
 const express = require('express')
+const morgan = require('morgan')
+
 const app = express()
 
 app.use(express.json())
+app.use(morgan((tks, req, res) => {
+    return [
+        tks.method(req, res),
+        tks.url(req, res),
+        tks.status(req, res),
+        tks.res(req, res, 'content-length'), '-',
+        tks['response-time'](req, res), 'ms'
+    ].join(' ')
+  }))
 
 let persons = [
     {
@@ -26,8 +37,6 @@ let persons = [
     }
 ]
 
-const contactAmt  = (persons.length)
-const currentTime = new Date()
 
 const generateId = () => {
     const topId = persons.length > 0
@@ -36,6 +45,8 @@ const generateId = () => {
     return Math.floor(Math.random() * (100 - topId) + topId)
 }
 
+const contactAmt  = (persons.length)
+const currentTime = new Date()
 
 app.get('/', (req, res) => {
     res.send('<h1>Fullstack, osa 3</h1>')
