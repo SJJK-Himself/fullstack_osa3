@@ -43,4 +43,5 @@ if(process.argv.length === 3){
 
 else{
     console.log("ERROR: Check your parameters!")
+    mongoose.connection.close()
 }
