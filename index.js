@@ -58,6 +58,7 @@ app.get('/', (req, res) => {
     res.send('<h1>Fullstack, osa 3</h1>')
 })
 
+//Toimii tietokannan kanssa
 app.get('/api/persons', (request, response) => {
     Person.find({}).then(persons => {
       response.json(persons)
@@ -83,33 +84,26 @@ app.delete('/api/persons/:id', (request, response) => {
     response.status(204).end()
 })
 
+//Toimii tietokannan kanssa
 app.post('/api/persons', (request, response) => {
     const body = request.body
-
+  
     if (!body.name || !body.number) {
         return response.status(400).json({ 
           error: 'Name or number missing' 
         })
     }
-
-    if (persons.some(p => p.name === body.name)) {
-        return response.status(400).json({ 
-            error: 'Name must be unique' 
-          })
-    }
-
-    const newPerson = {
+  
+    const person = new Person({
         id: generateId(),
         name: body.name,
         number: body.number
-    }
-
-    persons = persons.concat(newPerson)
-
-    console.log(newPerson)
-    response.json(newPerson)
+    })
+  
+    person.save().then(savedPerson => {
+      response.json(savedPerson)
+    })
 })
-
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
