@@ -42,7 +42,7 @@ let persons = [
     }
 ]
 
-
+//Ei kutsuta enää, koska tietokanta luo id:n.
 const generateId = () => {
     const topId = persons.length > 0
       ? Math.max(...persons.map(n => n.id))
@@ -50,7 +50,6 @@ const generateId = () => {
     return Math.floor(Math.random() * (100 - topId) + topId)
 }
 
-const contactAmt  = (persons.length)
 const currentTime = new Date()
 
 app.get('/', (req, res) => {
@@ -64,10 +63,16 @@ app.get('/api/persons', (request, response) => {
     })
 })
 
+//Toimii tietokannan kanssa
 app.get('/info', (req, res) => {
-    res.send('<p>Phonebook has info for ' + contactAmt + ' people</p>' + '<p>' + currentTime + '</p>')
+    const date = new Date()
+  
+    Person.find({}).then(persons => {
+      res.send(`<p>Phonebook has info for ${persons.length} people</p><p>${date}</p>`)
+    })
 })
 
+//Toimii tietokannan kanssa
 app.get('/api/persons/:id', (request, response, next) => {
     Person.findById(request.params.id)
         .then(person => {
@@ -100,7 +105,6 @@ app.post('/api/persons', (request, response) => {
     }
   
     const person = new Person({
-        id: generateId(),
         name: body.name,
         number: body.number
     })
