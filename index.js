@@ -1,14 +1,13 @@
-require('dotenv').config()
 const express = require('express')
-const morgan = require('morgan')
-const cors = require('cors')
-
 const app = express()
+const cors = require('cors')
+require('dotenv').config()
+const morgan = require('morgan')
+
 const Person = require('./models/person')
 
-
-app.use(cors())
 app.use(express.json())
+app.use(cors())
 app.use(express.static('build'))
 app.use(morgan((tks, req, res) => {
     return [
@@ -69,12 +68,16 @@ app.get('/info', (req, res) => {
     res.send('<p>Phonebook has info for ' + contactAmt + ' people</p>' + '<p>' + currentTime + '</p>')
 })
 
-app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const person = persons.find(person => person.id === id)
-    
-    if (person) {response.json(person)}
-    else {response.status(404).end()}
+app.get('/api/persons/:id', (request, response, next) => {
+    Person.findById(request.params.id)
+        .then(person => {
+            if (person) {
+                response.json(person)
+            } else {
+                response.status(404).end()
+            }   
+        })
+        .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -104,6 +107,18 @@ app.post('/api/persons', (request, response) => {
       response.json(savedPerson)
     })
 })
+
+const errorHandler = (error, request, response, next) => {
+    console.error(error.message)
+  
+    if (error.name === 'CastError') {
+      return response.status(400).send({ERROR: 'Malformatted id'})
+    }
+  
+    next(error)
+}
+  
+  app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
